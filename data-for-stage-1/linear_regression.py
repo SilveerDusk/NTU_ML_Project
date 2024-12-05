@@ -3,8 +3,31 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
+import csv
 
 data = pd.read_csv('./train_data.csv')
+test_data = pd.read_csv('./same_season_test_data.csv')
+
+def output_results(wlin, filename='results.csv'):
+
+  results = np.dot(test_x, wlin)
+
+  if not isinstance(results, np.ndarray):
+    raise ValueError("Input 'results' must be a NumPy array.")
+
+  signs = np.sign(results)  # Vectorized computation of signs
+
+  with open(filename, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    # Optional: Write a header row
+    writer.writerow(['id', 'home_team_win'])
+    
+    # Write data rows
+    for i, sign in enumerate(signs):
+      if sign > 0:
+        writer.writerow([i, True])
+      else:
+        writer.writerow([i, False])
 
 # Preprocessing function
 def preprocess_data(data):
@@ -66,8 +89,70 @@ def preprocess_data(data):
     
   return x, y, label_encoders
 
-x, y, label_encoders = preprocess_data(data)
+# Preprocessing function
+def preprocess_test_data(data, features):
+  # Drop non-predictive columns
+  drop_cols = ['id', 'date']
+  data = data.drop(columns=drop_cols, errors='ignore')
+  
+  # Handle categorical variables
+  categorical_cols = data.select_dtypes(include=['object']).columns
+  label_encoders = {}
+  for col in categorical_cols:
+      le = LabelEncoder()
+      data[col] = le.fit_transform(data[col].astype(str))
+      label_encoders[col] = le  # Save encoders if needed later
+  
+  # Handle missing values
+  data = data.fillna(data.median(numeric_only=True))
 
+  # Split features and target
+  x = data.filter(items = [
+    "away_pitching_SO_batters_faced_10RA",
+    "home_pitching_earned_run_avg_mean",
+    "away_pitcher_SO_batters_faced_mean",
+    "home_batting_onbase_plus_slugging_mean",
+    "home_pitching_H_batters_faced_10RA",
+    "home_pitching_SO_batters_faced_10RA",
+    "away_pitching_SO_batters_faced_mean",
+    "home_pitching_BB_batters_faced_mean",
+    "home_batting_onbase_plus_slugging_skew",
+    "away_pitching_leverage_index_avg_mean",
+    "away_pitching_SO_batters_faced_std",
+    "home_batting_onbase_plus_slugging_std",
+    "away_team_spread_mean",
+    "away_pitching_wpa_def_skew",
+    "away_pitching_BB_batters_faced_mean",
+    "away_batting_onbase_perc_mean",
+    "home_batting_onbase_perc_mean",
+    "home_batting_batting_avg_10RA",
+    "home_pitching_earned_run_avg_10RA",
+    "home_pitching_wpa_def_skew",
+    "away_pitching_earned_run_avg_10RA",
+    "home_pitching_H_batters_faced_mean",
+    "away_pitching_H_batters_faced_std",
+    "away_batting_leverage_index_avg_10RA",
+    "home_pitching_BB_batters_faced_std",
+    "away_batting_leverage_index_avg_skew",
+    "away_pitcher_earned_run_avg_mean",
+    "away_pitching_wpa_def_mean",
+    "away_pitcher_SO_batters_faced_10RA",
+    "away_batting_onbase_plus_slugging_mean"
+    ]).to_numpy()
+
+  # Normalize features
+  scaler = StandardScaler()
+  x = scaler.fit_transform(x)
+
+
+  X_train = np.array([[example[i] for i in range(1, features+1)] for example in x])
+
+  X_train_with_bias = np.hstack([np.ones((X_train.shape[0], 1)), X_train])
+    
+  return X_train_with_bias, label_encoders
+
+x, y, label_encoders = preprocess_data(data)
+test_x, label_encoders_2 = preprocess_test_data(test_data, 16)
 
 def selectData(features, sampleSize):
 
@@ -108,11 +193,13 @@ def linearRegression(features, N):
   accuracy = np.mean(np.sign(y_test_pred) == y_test)
   Eout = np.mean((y_test_pred - y_test) ** 2)
 
+  output_results(wlin)
+
   return Ein, Eout, accuracy
 
 def q10():
   Eins, Eouts, accs = [], [], []
-  for i in range(1126):
+  for i in range(1):
     Ein, Eout, acc = linearRegression(16, 1000)
     Eins.append(Ein)
     Eouts.append(Eout)
@@ -127,7 +214,8 @@ def q10():
 
   # Show the plot
   plt.scatter(Eins, Eouts, color='blue', alpha=0.4)
-  plt.show()
+
+
 
 def q11():
   N = 25
