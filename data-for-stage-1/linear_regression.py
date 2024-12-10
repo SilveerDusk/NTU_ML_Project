@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import csv
 
-data = pd.read_csv('../data-exploration/train_test_data.csv')
+data = pd.read_csv('./split_data/train_test_data.csv')
 test_data = pd.read_csv('./same_season_test_data.csv')
 
 def output_results(test_x, wlin, filename='results.csv'):
@@ -223,12 +223,12 @@ def plot_output(Ns, Eins, Eouts, accs):
   plt.show()
 
 def q10():
+  acc = 0
   Eins, Eouts, accs = [], [], []
-  features, sample_size, iterations = 16, 5000, 1
-
+  features, sample_size = 7, 5000
   x, y, test_x = preprocess_data(data, features)
-
-  for i in range(iterations):
+  
+  while acc < 0.58:
     Ein, Eout, acc = linearRegression(x, y, test_x, features, sample_size)
     Eins.append(Ein)
     Eouts.append(Eout)
@@ -272,34 +272,6 @@ def q11():
   plot_output(Ns, Eins, Eouts, accs)
 
 def q12():
-  Ns, Eins, Eouts, accs = [], [], [], []
-  features, N = 2, 25
-
-  x, y, test_x = preprocess_data(data, features)
-
-  while N < 9001:
-    EinSum, EoutSum, accSum = 0, 0, 0
-
-    for i in range(16):
-      Ein, Eout, acc = linearRegression(x, y, test_x, features, N)
-      EinSum += Ein
-      EoutSum += Eout
-      accSum += acc
-
-    EinSum /= 16
-    EoutSum /= 16
-    accSum /= 16
-
-    Ns.append(N)
-    Eins.append(EinSum)
-    Eouts.append(EoutSum)
-    accs.append(accSum)
-
-    N = N + 25
-
-  plot_output(Ns, Eins, Eouts, accs)
-
-def q13():
   features, Eins, Eouts, accs = [], [], [], []
   feature, N = 2, 5000
 
