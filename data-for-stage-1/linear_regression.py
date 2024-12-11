@@ -5,8 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import csv
 
-data = pd.read_csv('./split_data/train_test_data.csv')
-test_data = pd.read_csv('./same_season_test_data.csv')
+data = pd.read_csv('../data-exploration/train_test_data.csv')
+test_data = pd.read_csv('../data-for-stage-2/2024_test_data.csv')
 
 def output_results(test_x, wlin, filename='results.csv'):
 
@@ -225,10 +225,10 @@ def plot_output(Ns, Eins, Eouts, accs):
 def q10():
   acc = 0
   Eins, Eouts, accs = [], [], []
-  features, sample_size = 7, 5000
+  features, sample_size = 6, 5000
   x, y, test_x = preprocess_data(data, features)
   
-  while acc < 0.58:
+  while acc < 0.574:
     Ein, Eout, acc = linearRegression(x, y, test_x, features, sample_size)
     Eins.append(Ein)
     Eouts.append(Eout)
@@ -245,7 +245,7 @@ def q10():
 
 def q11():
   Ns, Eins, Eouts, accs = [], [], [], []
-  features, N = 7, 25
+  features, N = 6, 25
 
   x, y, test_x = preprocess_data(data, features)
 
@@ -298,4 +298,4 @@ def q12():
 
   plot_output(features, Eins, Eouts, accs)
 
-q11()
+q10()
